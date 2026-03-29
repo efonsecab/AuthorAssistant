@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="AuthorAssistant.ApiService/AuthorAssistant.ApiService.csproj" />
+  <Project Path="AuthorAssistant.AppHost/AuthorAssistant.AppHost.csproj" />
+  <Project Path="AuthorAssistant.ServiceDefaults/AuthorAssistant.ServiceDefaults.csproj" />
+  <Project Path="AuthorAssistant.Tests/AuthorAssistant.Tests.csproj" />
+  <Project Path="AuthorAssistant.Web/AuthorAssistant.Web.csproj" />
+</Solution>
