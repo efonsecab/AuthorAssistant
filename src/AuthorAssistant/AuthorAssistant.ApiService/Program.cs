@@ -1,3 +1,8 @@
+using AuthorAssistant.ApiService.Extensions;
+using AuthorAssistant.ApiService.MinimalApis;
+using AuthorAssistant.Services.GoogleGemini;
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
@@ -9,6 +14,8 @@ builder.Services.AddProblemDetails();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddGoogleGemini(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -17,9 +24,14 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
+
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
+
+
+app.MapSubstackApi();
 
 app.MapGet("/weatherforecast", () =>
 {

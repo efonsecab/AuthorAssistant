@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuthorAssistant.ServiceDefaults\AuthorAssistant.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\AuthorAssistant.Services\AuthorAssistant.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0-rc.1.25451.107" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.13.16" />
   </ItemGroup>
 
 </Project>
