@@ -30,18 +30,20 @@ namespace AuthorAssistant.ApiService.MinimalApis
 
             app.MapPost("api/substack/generateImage",
                 async ([FromServices] IGoogleGeminiService googleGeminiService,
-                [FromBody] SubstackArticleRequest request, CancellationToken cancellationToken) =>
+                [FromBody] SubstackImageRequest request, CancellationToken cancellationToken) =>
                 {
                     try
                     {
                         string prompt = $"Create an image for an article with the following information: " +
                         $"PublicationName: {request.PublicationName}. " +
                         $"PublicationDescription: {request.PublicationDescription}. " +
-                        $"TitleDraft: {request.TitleDraft}. " +
-                        $"ArticleDraft: {request.ArticleDraft}. " +
+                        $"TitleDraft: {request.Title}. " +
+                        $"ArticleDraft: {request.Article}. " +
                         $"The image should be eye-catching and relevant to the article content. " +
                         $"The image should be in a vertical format suitable for Substack articles.";
-                        var result = await googleGeminiService.CreateImageAsync(prompt, cancellationToken);
+                        var result = await googleGeminiService.CreateImageAsync(prompt,
+                            imageSize: request.Generate4KImage == true ? Services.GoogleGemini.Enums.ImageSize.FourK: Services.GoogleGemini.Enums.ImageSize.OneK,
+                            cancellationToken);
                         return result.imageBytes is not null ?
                         Results.File(
                             fileContents: result.imageBytes,
@@ -68,6 +70,19 @@ namespace AuthorAssistant.ApiService.MinimalApis
         public required string? PublicationName { get; set; }
         [Required]
         public required string? PublicationDescription { get; set; }
+    }
 
+    public class SubstackImageRequest
+    {
+        [Required]
+        public required string? Title { get; set; }
+        [Required]
+        public required string? Article { get; set; }
+        [Required]
+        public required string? PublicationName { get; set; }
+        [Required]
+        public required string? PublicationDescription { get; set; }
+        [Required]
+        public required bool? Generate4KImage { get; set; }
     }
 }

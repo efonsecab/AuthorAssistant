@@ -1,4 +1,5 @@
-﻿using Google.GenAI;
+﻿using AuthorAssistant.Services.GoogleGemini.Enums;
+using Google.GenAI;
 using Google.GenAI.Types;
 using Microsoft.Extensions.Logging;
 
@@ -9,7 +10,8 @@ namespace AuthorAssistant.Services.GoogleGemini
     {
         private const string generateContentModel = "gemini-3.1-flash-lite-preview";
         private const string generateImageModel = "gemini-3.1-flash-image-preview";
-        public async Task<(byte[]? imageBytes, string? mimeType)> CreateImageAsync(string prompt, CancellationToken cancellationToken)
+        public async Task<(byte[]? imageBytes, string? mimeType)> 
+            CreateImageAsync(string prompt, ImageSize imageSize, CancellationToken cancellationToken)
         {
             var contents = new List<Content>
                 {
@@ -34,7 +36,13 @@ namespace AuthorAssistant.Services.GoogleGemini
                 ImageConfig = new ImageConfig
                 {
                     AspectRatio = "1:1",
-                    ImageSize = "1K"
+                    ImageSize = imageSize switch
+                    {
+                        ImageSize.OneK => "1K",
+                        ImageSize.TwoK => "2K",
+                        ImageSize.FourK => "4K",
+                        _ => "1K"
+                    }
                 },
                 ResponseModalities = new List<string>
                     {
