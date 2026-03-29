@@ -39,6 +39,7 @@ string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "
 
 
 app.MapSubstackApi();
+app.MapBookApi();
 
 app.MapGet("/weatherforecast", () =>
 {

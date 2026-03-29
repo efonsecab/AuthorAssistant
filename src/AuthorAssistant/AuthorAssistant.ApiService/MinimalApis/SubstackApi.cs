@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using AuthorAssistant.Services.NanoBanana.Enums;
 using AuthorAssistant.Services.NanoBanana;
 using AuthorAssistant.Services.Veo;
+using AuthorAssistant.ApiService.MinimalApis.Enums;
 
 namespace AuthorAssistant.ApiService.MinimalApis
 {
@@ -212,27 +213,5 @@ namespace AuthorAssistant.ApiService.MinimalApis
         public required string? PublicationDescription { get; set; }
         [Required]
         public required VideoStyle? VideoStyle { get; set; }
-    }
-
-    public enum ImageStyle
-    {
-        Photorealistic,
-        Animated,
-        LEGO,
-        Anime,
-        Animated_Transformers,
-        LiveAction_Transformers,
-        PixelArt
-    }
-
-    public enum VideoStyle
-    {
-        Photorealistic,
-        Animated,
-        LEGO,
-        Anime,
-        Animated_Transformers,
-        LiveAction_Transformers,
-        PixelArt
     }
 }
