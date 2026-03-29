@@ -87,6 +87,33 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     }
                 }).WithName("GenerateVideo");
 
+            app.MapPost("api/substack/generateNotes",
+                async ([FromServices] IGoogleGeminiService googleGeminiService,
+                [FromBody] SubstackNotesRequest request, CancellationToken cancellationToken) =>
+                {
+                    string prompt = $"I'm writing an article for my Substack publication {request.PublicationName}. " +
+                        $"The publication is about {request.PublicationDescription}. " +
+                        $"I need you to create a high-quality engaging text for Substack Notes based on my Substack Article. " +
+                        $"Article Title: {request.Title}. " +
+                        $"Article Content: {request.Article}";
+                    var result = await googleGeminiService.GenerateContentAsync(prompt, cancellationToken);
+                    return result is not null ? Results.Ok(result) : Results.NoContent();
+                }).WithName("GenerateNotes");
+
+            app.MapPost("api/substack/generateLinkedInPost",
+                async ([FromServices] IGoogleGeminiService googleGeminiService,
+                [FromBody] SubstackLinkedInPostRequest request, CancellationToken cancellationToken) =>
+                {
+                    string prompt = $"I'm writing an article for my Substack publication {request.PublicationName}. " +
+                        $"The publication is about {request.PublicationDescription}. " +
+                        $"I need you to create a high-quality engaging post for my LinkedIn feed based on my Substack Article. " +
+                        $"Article Title: {request.Title}. " +
+                        $"Article Content: {request.Article}. " +
+                        $"Post must have the link to the Substack Content Url: {request.SubstackContentUrl}";
+                    var result = await googleGeminiService.GenerateContentAsync(prompt, cancellationToken);
+                    return result is not null ? Results.Ok(result) : Results.NoContent();
+                }).WithName("GenerateLinkedInPost");
+
             return app;
         }
     }
@@ -101,6 +128,32 @@ namespace AuthorAssistant.ApiService.MinimalApis
         public required string? PublicationName { get; set; }
         [Required]
         public required string? PublicationDescription { get; set; }
+    }
+
+    public class SubstackNotesRequest
+    {
+        [Required]
+        public required string? Title { get; set; }
+        [Required]
+        public required string? Article { get; set; }
+        [Required]
+        public required string? PublicationName { get; set; }
+        [Required]
+        public required string? PublicationDescription { get; set; }
+    }
+
+    public class SubstackLinkedInPostRequest
+    {
+        [Required]
+        public required string? Title { get; set; }
+        [Required]
+        public required string? Article { get; set; }
+        [Required]
+        public required string? PublicationName { get; set; }
+        [Required]
+        public required string? PublicationDescription { get; set; }
+        [Required]
+        public required string? SubstackContentUrl { get; set; }
     }
 
     public class SubstackImageRequest
