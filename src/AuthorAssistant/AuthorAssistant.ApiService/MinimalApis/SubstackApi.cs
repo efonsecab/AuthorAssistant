@@ -3,6 +3,7 @@ using AuthorAssistant.Services.GoogleGemini;
 using System.ComponentModel.DataAnnotations;
 using AuthorAssistant.Services.NanoBanana.Enums;
 using AuthorAssistant.Services.NanoBanana;
+using AuthorAssistant.Services.Veo;
 
 namespace AuthorAssistant.ApiService.MinimalApis
 {
@@ -59,6 +60,33 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     }
                 }).WithName("GenerateImage");
 
+            app.MapPost("api/substack/generateVideo",
+                async ([FromServices] IVeoService veoService,
+                [FromBody] SubstackVideoRequest request, CancellationToken cancellationToken) =>
+                {
+                    try
+                    {
+                        string prompt = $"Create a video for an article. " +
+                        $"The video style must be: {request.VideoStyle}. " +
+                        $"The video should be eye-catching and relevant to the article content. " +
+                        $"The video should be in a vertical format suitable for Substack articles. " +
+                        $"Publication Name: {request.PublicationName}. " +
+                        $"Publication Description: {request.PublicationDescription}. " +
+                        $"Article Title: {request.Title}. " +
+                        $"Article Content: {request.Article}. ";
+                        var result = await veoService.CreateVideoAsync(prompt, cancellationToken);
+                        return result.videoBytes is not null ?
+                        Results.File(
+                            fileContents: result.videoBytes,
+                            contentType: result.mimeType ?? "application/octet-stream")
+                        : Results.NoContent();
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.Problem(detail: ex.Message, statusCode: 500);
+                    }
+                }).WithName("GenerateVideo");
+
             return app;
         }
     }
@@ -91,7 +119,32 @@ namespace AuthorAssistant.ApiService.MinimalApis
         public required ImageStyle? ImageStyle { get; set; }
     }
 
+    public class SubstackVideoRequest
+    {
+        [Required]
+        public required string? Title { get; set; }
+        [Required]
+        public required string? Article { get; set; }
+        [Required]
+        public required string? PublicationName { get; set; }
+        [Required]
+        public required string? PublicationDescription { get; set; }
+        [Required]
+        public required VideoStyle? VideoStyle { get; set; }
+    }
+
     public enum ImageStyle
+    {
+        Photorealistic,
+        Animated,
+        LEGO,
+        Anime,
+        Animated_Transformers,
+        LiveAction_Transformers,
+        PixelArt
+    }
+
+    public enum VideoStyle
     {
         Photorealistic,
         Animated,

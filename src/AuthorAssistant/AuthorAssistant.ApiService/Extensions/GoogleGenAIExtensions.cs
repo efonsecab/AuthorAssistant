@@ -1,5 +1,6 @@
 ﻿using AuthorAssistant.Services.GoogleGemini;
 using AuthorAssistant.Services.NanoBanana;
+using AuthorAssistant.Services.Veo;
 
 namespace AuthorAssistant.ApiService.Extensions
 {
@@ -28,6 +29,16 @@ namespace AuthorAssistant.ApiService.Extensions
                             Timeout = (int)TimeSpan.FromMinutes(5).TotalMilliseconds
                         });
                 });
+            services.AddKeyedTransient<Google.GenAI.Client>(serviceKey: "VeoServiceGenAIClient",
+                (sp, key) =>
+                {
+                    var config = sp.GetRequiredService<GoogleGeminiConfiguration>();
+                    return new Google.GenAI.Client(apiKey: config.ApiKey,
+                        httpOptions: new Google.GenAI.Types.HttpOptions()
+                        {
+                            Timeout = (int)TimeSpan.FromMinutes(10).TotalMilliseconds
+                        });
+                });
             services.AddTransient<INanoBananaService, NanoBananaService>(sp=>
             {
                 var genAIClient = sp.GetRequiredKeyedService<Google.GenAI.Client>("NanoBananaServiceGenAIClient");
@@ -39,6 +50,12 @@ namespace AuthorAssistant.ApiService.Extensions
                 var genAIClient = sp.GetRequiredKeyedService<Google.GenAI.Client>("GoogleGeminiServiceGenAIClient");
                 var logger = sp.GetRequiredService<ILogger<GoogleGeminiService>>();
                 return new GoogleGeminiService(logger, genAIClient);
+            });
+            services.AddTransient<IVeoService, VeoService>(sp =>
+            {
+                var genAIClient = sp.GetRequiredKeyedService<Google.GenAI.Client>("VeoServiceGenAIClient");
+                var logger = sp.GetRequiredService<ILogger<VeoService>>();
+                return new VeoService(logger, genAIClient);
             });
             return services;
         }
