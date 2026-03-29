@@ -114,6 +114,20 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     return result is not null ? Results.Ok(result) : Results.NoContent();
                 }).WithName("GenerateLinkedInPost");
 
+            app.MapPost("api/substack/generateFacebookPersonalFeedPost",
+                async ([FromServices] IGoogleGeminiService googleGeminiService,
+                [FromBody] SubstackFacebookPostRequest request, CancellationToken cancellationToken) =>
+                {
+                    string prompt = $"I'm writing an article for my Substack publication {request.PublicationName}. " +
+                        $"The publication is about {request.PublicationDescription}. " +
+                        $"I need you to create a high-quality engaging post for my Facebook personal feed based on my Substack Article. " +
+                        $"Article Title: {request.Title}. " +
+                        $"Article Content: {request.Article}. " +
+                        $"Post must have the link to the Substack Content Url: {request.SubstackContentUrl}";
+                    var result = await googleGeminiService.GenerateContentAsync(prompt, cancellationToken);
+                    return result is not null ? Results.Ok(result) : Results.NoContent();
+                }).WithName("GenerateFacebookPersonalFeedPost");
+
             return app;
         }
     }
@@ -143,6 +157,20 @@ namespace AuthorAssistant.ApiService.MinimalApis
     }
 
     public class SubstackLinkedInPostRequest
+    {
+        [Required]
+        public required string? Title { get; set; }
+        [Required]
+        public required string? Article { get; set; }
+        [Required]
+        public required string? PublicationName { get; set; }
+        [Required]
+        public required string? PublicationDescription { get; set; }
+        [Required]
+        public required string? SubstackContentUrl { get; set; }
+    }
+
+    public class SubstackFacebookPostRequest
     {
         [Required]
         public required string? Title { get; set; }
