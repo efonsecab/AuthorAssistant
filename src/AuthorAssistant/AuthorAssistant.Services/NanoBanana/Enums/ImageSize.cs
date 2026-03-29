@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AuthorAssistant.Services.GoogleGemini.Enums
+namespace AuthorAssistant.Services.NanoBanana.Enums
 {
     public enum ImageSize
     {

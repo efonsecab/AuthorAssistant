@@ -2,6 +2,7 @@ using AuthorAssistant.ApiService.Extensions;
 using AuthorAssistant.ApiService.MinimalApis;
 using AuthorAssistant.Services.GoogleGemini;
 using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,13 @@ builder.Services.AddProblemDetails();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddGoogleGemini(builder.Configuration);
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+
+builder.Services.AddGoogleGenAI(builder.Configuration);
 
 var app = builder.Build();
 

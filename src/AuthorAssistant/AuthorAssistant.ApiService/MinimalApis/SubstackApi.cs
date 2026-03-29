@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AuthorAssistant.Services.GoogleGemini;
 using System.ComponentModel.DataAnnotations;
+using AuthorAssistant.Services.NanoBanana.Enums;
+using AuthorAssistant.Services.NanoBanana;
 
 namespace AuthorAssistant.ApiService.MinimalApis
 {
@@ -29,20 +31,21 @@ namespace AuthorAssistant.ApiService.MinimalApis
             }).WithName("GenerateArticle");
 
             app.MapPost("api/substack/generateImage",
-                async ([FromServices] IGoogleGeminiService googleGeminiService,
+                async ([FromServices] INanoBananaService nanoBananaService,
                 [FromBody] SubstackImageRequest request, CancellationToken cancellationToken) =>
                 {
                     try
                     {
-                        string prompt = $"Create an image for an article with the following information: " +
-                        $"PublicationName: {request.PublicationName}. " +
-                        $"PublicationDescription: {request.PublicationDescription}. " +
-                        $"TitleDraft: {request.Title}. " +
-                        $"ArticleDraft: {request.Article}. " +
+                        string prompt = $"Create an image for an article. " +
+                        $"The image style must be: {request.ImageStyle}. " +
                         $"The image should be eye-catching and relevant to the article content. " +
-                        $"The image should be in a vertical format suitable for Substack articles.";
-                        var result = await googleGeminiService.CreateImageAsync(prompt,
-                            imageSize: request.Generate4KImage == true ? Services.GoogleGemini.Enums.ImageSize.FourK: Services.GoogleGemini.Enums.ImageSize.OneK,
+                        $"The image should be in a vertical format suitable for Substack articles. " +
+                        $"Publication Name: {request.PublicationName}. " +
+                        $"Publication Description: {request.PublicationDescription}. " +
+                        $"Article Title: {request.Title}. " +
+                        $"Article Content: {request.Article}. ";
+                        var result = await nanoBananaService.CreateImageAsync(prompt,
+                            imageSize: request.Generate4KImage == true ? ImageSize.FourK: ImageSize.OneK,
                             cancellationToken);
                         return result.imageBytes is not null ?
                         Results.File(
@@ -84,5 +87,18 @@ namespace AuthorAssistant.ApiService.MinimalApis
         public required string? PublicationDescription { get; set; }
         [Required]
         public required bool? Generate4KImage { get; set; }
+        [Required]
+        public required ImageStyle? ImageStyle { get; set; }
+    }
+
+    public enum ImageStyle
+    {
+        Photorealistic,
+        Animated,
+        LEGO,
+        Anime,
+        Animated_Transformers,
+        LiveAction_Transformers,
+        PixelArt
     }
 }
