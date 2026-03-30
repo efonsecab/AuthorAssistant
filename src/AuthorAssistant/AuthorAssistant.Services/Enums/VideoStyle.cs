@@ -8,6 +8,7 @@
         Anime,
         Animated_Transformers,
         LiveAction_Transformers,
-        PixelArt
+        PixelArt,
+        SuperMario,
     }
 }

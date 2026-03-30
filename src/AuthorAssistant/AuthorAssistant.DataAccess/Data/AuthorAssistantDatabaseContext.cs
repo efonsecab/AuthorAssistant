@@ -22,6 +22,8 @@ public partial class AuthorAssistantDatabaseContext : DbContext
 
     public virtual DbSet<BookFile> BookFiles { get; set; }
 
+    public virtual DbSet<BookPromoVideo> BookPromoVideos { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Book>(entity =>
@@ -73,6 +75,21 @@ public partial class AuthorAssistantDatabaseContext : DbContext
                 .HasForeignKey(d => d.BookId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BookFile_Book");
+        });
+
+        modelBuilder.Entity<BookPromoVideo>(entity =>
+        {
+            entity.ToTable("BookPromoVideo");
+
+            entity.Property(e => e.BinaryData).IsRequired();
+            entity.Property(e => e.MimeType)
+                .IsRequired()
+                .HasMaxLength(250);
+
+            entity.HasOne(d => d.Book).WithMany(p => p.BookPromoVideos)
+                .HasForeignKey(d => d.BookId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_BookPromoVideo_Book");
         });
 
         OnModelCreatingPartial(modelBuilder);

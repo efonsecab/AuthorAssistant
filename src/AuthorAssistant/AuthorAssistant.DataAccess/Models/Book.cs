@@ -21,5 +21,7 @@ public partial class Book
 
     public virtual ICollection<BookFile> BookFiles { get; set; } = new List<BookFile>();
 
+    public virtual ICollection<BookPromoVideo> BookPromoVideos { get; set; } = new List<BookPromoVideo>();
+
     public virtual AspNetUser Owner { get; set; }
 }

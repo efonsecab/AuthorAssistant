@@ -33,6 +33,10 @@
       {
          "Name": "[dbo].[BookFile]",
          "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BookPromoVideo]",
+         "ObjectType": 0
       }
    ],
    "UiHint": null,

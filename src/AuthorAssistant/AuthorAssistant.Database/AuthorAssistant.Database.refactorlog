@@ -21,4 +21,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="BookCoverImageConceptId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="77ed2211-992e-406c-a447-cf3ececeb9b6" ChangeDateTime="03/30/2026 18:30:15">
+    <Property Name="ElementName" Value="[dbo].[BookPromoVideo].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[BookPromoVideo]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="BookPromoVideoId" />
+  </Operation>
 </Operations>

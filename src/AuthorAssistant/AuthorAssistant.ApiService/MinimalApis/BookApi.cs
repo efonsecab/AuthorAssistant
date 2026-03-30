@@ -130,29 +130,28 @@ namespace AuthorAssistant.ApiService.MinimalApis
                 }).WithName("UpdateBook");
 
             bookGroup.MapPost("/createBookPromoVideo",
-                async ([FromServices] IVeoService veoService,
-                [FromBody] BookVideoRequest request, CancellationToken cancellationToken) =>
+                async (
+                    [FromServices]BookService bookService, 
+                    [FromQuery] long bookId,
+                    [FromQuery] VideoStyle videoStyle,
+                    CancellationToken cancellationToken) =>
             {
-                try
-                {
-                    string prompt = "Create a promotional video for a book with the following details:\n" +
-                    $"Show Text In Video: {request.ShowTextInVideo}\n" +
-                    $"Add Voice Over: {request.AddVoiceOver}\n" +
-                    $"Video Style: {request.VideoStyle}\n" +
-                    $"Title: {request.Title}\n" +
-                    $"Content: {request.Content}\n";
-                    var result = await veoService.CreateVideoAsync(prompt, cancellationToken);
-                    return result.videoBytes is not null ?
-                    Results.File(
-                        fileContents: result.videoBytes,
-                        contentType: result.mimeType ?? "application/octet-stream")
-                    : Results.NoContent();
-                }
-                catch (Exception ex)
-                {
-                    return Results.Problem(detail: ex.Message, statusCode: 500);
-                }
+                await bookService.CreateBookPromoVideoAsync(bookId, videoStyle, cancellationToken);
+                return Results.NoContent();
             });
+
+            bookGroup.MapGet("/BookPromoVideo",
+                async ([FromServices] BookService bookService,
+                long bookPromoVideoId,
+                CancellationToken cancellationToken) =>
+                {
+                    var result = await bookService.GetBookPromoVideoByBookPromoVideoIdAsync(bookPromoVideoId, cancellationToken);
+                    return result.BinaryData is not null ?
+                        Results.File(
+                            fileContents: result.BinaryData,
+                            contentType: result.MimeType ?? "application/octet-stream")
+                        : Results.NoContent();
+                });
             return app;
         }
     }

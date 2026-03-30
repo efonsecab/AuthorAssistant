@@ -4,12 +4,14 @@ using AuthorAssistant.Models.Book;
 using AuthorAssistant.Services.Enums;
 using AuthorAssistant.Services.NanoBanana;
 using AuthorAssistant.Services.NanoBanana.Enums;
+using AuthorAssistant.Services.Veo;
+using Azure.Core;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorAssistant.Services.Book
 {
     public class BookService(AuthorAssistantDatabaseContext authorAssistantDatabaseContext,
-        INanoBananaService nanoBananaService)
+        INanoBananaService nanoBananaService, IVeoService veoService)
     {
         public async Task<BookModel> CreateBookAsync(CreateBookModel bookModel, string ownerId, CancellationToken cancellationToken)
         {
@@ -161,8 +163,8 @@ namespace AuthorAssistant.Services.Book
 
         public async Task<BookCoverImageConceptModel> GetBookCoverImageConceptByBookCoverImageConceptIdAsync(long bookCoverImageConceptId, CancellationToken cancellationToken)
         {
-                        var entity = await authorAssistantDatabaseContext.BookCoverImageConcepts
-                .SingleOrDefaultAsync(p => p.BookCoverImageConceptId == bookCoverImageConceptId, cancellationToken: cancellationToken);
+            var entity = await authorAssistantDatabaseContext.BookCoverImageConcepts
+    .SingleOrDefaultAsync(p => p.BookCoverImageConceptId == bookCoverImageConceptId, cancellationToken: cancellationToken);
             if (entity is not null)
             {
                 return new BookCoverImageConceptModel()
@@ -225,6 +227,60 @@ namespace AuthorAssistant.Services.Book
             else
             {
                 throw new Exception("Book file not found");
+            }
+        }
+
+        public async Task<BookPromoVideoModel> CreateBookPromoVideoAsync(long bookId,
+            VideoStyle videoStyle,
+            CancellationToken cancellationToken)
+        {
+            var entity = await authorAssistantDatabaseContext.Books
+                .SingleOrDefaultAsync(p => p.BookId == bookId, cancellationToken: cancellationToken);
+            if (entity is not null)
+            {
+                string prompt = "Create a promotional video for a book with the following details.\n" +
+                    $"Show Text In Video: false\n" +
+                    $"Add Voice Over: false\n" +
+                    $"Video Style: {videoStyle}\n" +
+                    $"Book Title: {entity.Name}\n" +
+                    $"Book Description: {entity.Description}\n";
+                var videoResponse = await veoService.CreateVideoAsync(prompt, cancellationToken);
+                BookPromoVideo bookPromoVideo = new BookPromoVideo()
+                {
+                    BinaryData = videoResponse.videoBytes,
+                    MimeType = videoResponse.mimeType,
+                    BookId = bookId
+                };
+                await authorAssistantDatabaseContext.BookPromoVideos.AddAsync(bookPromoVideo, cancellationToken: cancellationToken);
+                await authorAssistantDatabaseContext.SaveChangesAsync(cancellationToken);
+                BookPromoVideoModel bookPromoVideoModel = new BookPromoVideoModel()
+                {
+                    BookPromoVideoId = bookPromoVideo.BookPromoVideoId
+                };
+                return bookPromoVideoModel;
+            }
+            else
+            {
+                throw new Exception("Book not found");
+            }
+        }
+
+        public async Task<BookPromoVideoModel> GetBookPromoVideoByBookPromoVideoIdAsync(long bookPromoVideoId, CancellationToken cancellationToken)
+        {
+            var entity = await authorAssistantDatabaseContext.BookPromoVideos
+                .SingleOrDefaultAsync(p => p.BookPromoVideoId == bookPromoVideoId, cancellationToken: cancellationToken);
+            if (entity is not null)
+            {
+                return new BookPromoVideoModel()
+                {
+                    BookPromoVideoId = entity.BookPromoVideoId,
+                    BinaryData = entity.BinaryData,
+                    MimeType = entity.MimeType
+                };
+            }
+            else
+            {
+                throw new Exception("Book promo video not found");
             }
         }
     }
