@@ -3,6 +3,7 @@ using AuthorAssistant.DataAccess.Models;
 using AuthorAssistant.Models.Book;
 using AuthorAssistant.Services.Enums;
 using AuthorAssistant.Services.NanoBanana;
+using AuthorAssistant.Services.NanoBanana.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorAssistant.Services.Book
@@ -122,25 +123,58 @@ namespace AuthorAssistant.Services.Book
             }
         }
 
-        public async Task CreateBookCoverImageConceptAsync(long bookId,
-            ImageStyle imageStyle,
+        public async Task<BookCoverImageConceptModel> CreateBookCoverImageConceptAsync(long bookId,
+            ImageStyle imageStyle, ImageSize imageSize,
             CancellationToken cancellationToken)
         {
             var entity = await authorAssistantDatabaseContext.Books
                 .SingleOrDefaultAsync(p => p.BookId == bookId, cancellationToken: cancellationToken);
             if (entity is not null)
             {
-                var bookFile = await authorAssistantDatabaseContext.BookFiles
-                    .SingleOrDefaultAsync(p => p.BookId == bookId, cancellationToken: cancellationToken);
-                var bookText = bookFile is not null ? System.Text.Encoding.UTF8.GetString(bookFile.BinaryData) :
-                    string.Empty;
                 string prompt = $"Create an book cover image concept for a book with the following details:\n" +
                 $"Image Style: {imageStyle}\n" +
                 $"Book Title: {entity.Name}\n" +
-                $"Book Content: {bookText}\n" +
+                $"Book Content: {entity.TextContent}\n" +
                 $"Image must not have text\n" +
                 $"Image must follow amazon kdp guidelines.\n" +
                 $"I will use the image to place in the Amazon KDP Cover Designer";
+                var response = await nanoBananaService.CreateImageAsync(prompt, imageSize, cancellationToken);
+                BookCoverImageConcept bookCoverImageConcept = new BookCoverImageConcept()
+                {
+                    BinaryData = response.imageBytes,
+                    MimeType = response.mimeType,
+                    BookId = bookId
+                };
+                await authorAssistantDatabaseContext.BookCoverImageConcepts.AddAsync(bookCoverImageConcept, cancellationToken: cancellationToken);
+                await authorAssistantDatabaseContext.SaveChangesAsync(cancellationToken);
+                BookCoverImageConceptModel bookCoverImageConceptModel = new BookCoverImageConceptModel()
+                {
+                    BookCoverImageConceptId = bookCoverImageConcept.BookCoverImageConceptId
+                };
+                return bookCoverImageConceptModel;
+            }
+            else
+            {
+                throw new Exception("Book not found");
+            }
+        }
+
+        public async Task<BookCoverImageConceptModel> GetBookCoverImageConceptByBookCoverImageConceptIdAsync(long bookCoverImageConceptId, CancellationToken cancellationToken)
+        {
+                        var entity = await authorAssistantDatabaseContext.BookCoverImageConcepts
+                .SingleOrDefaultAsync(p => p.BookCoverImageConceptId == bookCoverImageConceptId, cancellationToken: cancellationToken);
+            if (entity is not null)
+            {
+                return new BookCoverImageConceptModel()
+                {
+                    BookCoverImageConceptId = entity.BookCoverImageConceptId,
+                    BinaryData = entity.BinaryData,
+                    MimeType = entity.MimeType
+                };
+            }
+            else
+            {
+                throw new Exception("Book cover image concept not found");
             }
         }
 

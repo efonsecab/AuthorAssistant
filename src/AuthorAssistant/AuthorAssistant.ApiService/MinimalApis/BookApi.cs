@@ -1,4 +1,5 @@
-﻿using AuthorAssistant.Models.Book;
+﻿using AuthorAssistant.DataAccess.Models;
+using AuthorAssistant.Models.Book;
 using AuthorAssistant.Services.Book;
 using AuthorAssistant.Services.Enums;
 using AuthorAssistant.Services.NanoBanana;
@@ -38,7 +39,8 @@ namespace AuthorAssistant.ApiService.MinimalApis
                             contentType: result.mimeType ?? "application/octet-stream")
                         : Results.NoContent();
             });
-            bookGroup.MapPost("/uploadBookFile", 
+
+            bookGroup.MapPost("/uploadBookFile",
                 async (
                     [FromServices] BookService bookService,
                     [FromBody] UploadBookFileModel uploadBookFileModel) =>
@@ -46,7 +48,31 @@ namespace AuthorAssistant.ApiService.MinimalApis
                 await bookService.UploadBookFileAsync(uploadBookFileModel.BookId!.Value, uploadBookFileModel, CancellationToken.None);
             }).WithName("UploadBook");
 
-            bookGroup.MapGet("/content", 
+            bookGroup.MapPost("/createBookCoverImageConcept",
+                async ([FromServices] BookService bookService, 
+                [FromQuery] long bookId,
+                [FromQuery] ImageStyle imageStyle,
+                [FromQuery] ImageSize imageSize,
+                CancellationToken cancellationToken) =>
+                {
+                    await bookService.CreateBookCoverImageConceptAsync(bookId, imageStyle, imageSize, cancellationToken);
+                    return Results.NoContent();
+                });
+
+            bookGroup.MapGet("/bookCoverImageConcept", 
+                async ([FromServices] BookService bookService, 
+                long bookCoverImageConceptId,
+                CancellationToken cancellationToken ) => 
+                {
+                    var result = await bookService.GetBookCoverImageConceptByBookCoverImageConceptIdAsync(bookCoverImageConceptId, cancellationToken);
+                    return result.BinaryData is not null ?
+                        Results.File(
+                            fileContents: result.BinaryData,
+                            contentType: result.MimeType ?? "application/octet-stream")
+                        : Results.NoContent();
+                });
+
+            bookGroup.MapGet("/content",
                 async ([FromServices] BookService bookService,
                        [FromQuery] long bookId,
                        CancellationToken cancellationToken) =>
@@ -71,7 +97,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     return Results.Ok(result);
                 }).WithName("CreateBook");
 
-            bookGroup.MapGet("getAllMyBooks", 
+            bookGroup.MapGet("getAllMyBooks",
                 async ([FromServices] BookService bookService,
                        [FromServices] IUserProviderService userProviderService,
                        CancellationToken cancellationToken) =>
@@ -91,7 +117,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     return Results.Ok(result);
                 }).WithName("GetBookByBookId");
 
-            bookGroup.MapPut("/updateBook", 
+            bookGroup.MapPut("/updateBook",
                 async ([FromServices] BookService bookService,
                        [FromServices] IUserProviderService userProviderService,
                        [FromBody] CreateBookModel createBookModel,
