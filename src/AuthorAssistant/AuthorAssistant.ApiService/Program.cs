@@ -1,4 +1,5 @@
 using AuthorAssistant.ApiService.Extensions;
+using AuthorAssistant.ApiService.Handlers;
 using AuthorAssistant.ApiService.MinimalApis;
 using AuthorAssistant.ApiService.Providers;
 using AuthorAssistant.DataAccess.Data;
@@ -14,6 +15,8 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
