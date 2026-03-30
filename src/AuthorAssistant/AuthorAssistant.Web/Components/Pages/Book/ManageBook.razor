@@ -1,0 +1,81 @@
+﻿@page "/book/manage"
+@page "/book/manage/{BookId:long}"
+
+@using AuthorAssistant.Models.Book
+@using AuthorAssistant.Web.ApiClients
+@using AuthorAssistant.Web.Components.Spinners
+
+@rendermode InteractiveServer
+
+@inject BookApiClient bookApiClient
+
+<h3>ManageBook</h3>
+
+
+@if (IsBusy)
+{
+    <LoadingSpinner></LoadingSpinner>
+}
+
+<EditForm Model="@createBookModel" OnValidSubmit="OnValidSubmitAsync">
+    <div class="row">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label for="@nameof(CreateBookModel.Name)">Name:</label>
+        </div>
+        <div class="col">
+            <InputText class="form-control" @bind-Value="createBookModel.Name" />
+            <ValidationMessage For="@(() => createBookModel.Name)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label for="@nameof(CreateBookModel.Description)">Description:</label>
+        </div>
+        <div class="col">
+            <InputTextArea class="form-control" @bind-Value="createBookModel.Description" />
+            <ValidationMessage For="@(() => createBookModel.Description)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            @if (this.IsBusy == false)
+            {
+                <button type="submit" class="btn btn-primary">Create Book</button>
+            }
+        </div>
+    </div>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public long? BookId { get; set; }
+    private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+    private bool IsBusy { get; set; } = false;
+    public CreateBookModel createBookModel { get; set; } = new CreateBookModel()
+    {
+        Description = string.Empty,
+        Name = string.Empty
+    };
+
+    private async Task OnValidSubmitAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            var result = await bookApiClient.CreateBookAsync(createBookModel, cancellationTokenSource.Token);
+        }
+        catch (Exception ex)
+        {
+            // Handle exception (e.g., show error message)
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+}

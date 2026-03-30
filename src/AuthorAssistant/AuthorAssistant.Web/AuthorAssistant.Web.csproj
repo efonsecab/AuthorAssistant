@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AuthorAssistant.Models\AuthorAssistant.Models.csproj" />
     <ProjectReference Include="..\AuthorAssistant.ServiceDefaults\AuthorAssistant.ServiceDefaults.csproj" />
   </ItemGroup>
 

@@ -7,10 +7,10 @@ namespace AuthorAssistant.Services.Book
 {
     public class BookService(AuthorAssistantDatabaseContext authorAssistantDatabaseContext)
     {
-        public async Task<BookModel> CreateBookAsync(CreateBookModel bookModel, CancellationToken cancellationToken)
+        public async Task<BookModel> CreateBookAsync(CreateBookModel bookModel, string ownerId, CancellationToken cancellationToken)
         {
             var entity = await authorAssistantDatabaseContext.Books
-                .SingleOrDefaultAsync(p => p.Name == bookModel.Name && p.OwnerId == bookModel.OwnerId,
+                .SingleOrDefaultAsync(p => p.Name == bookModel.Name && p.OwnerId == ownerId,
                 cancellationToken: cancellationToken);
             if (entity is null)
             {
@@ -18,7 +18,7 @@ namespace AuthorAssistant.Services.Book
                 {
                     Description = bookModel.Description,
                     Name = bookModel.Name,
-                    OwnerId = bookModel.OwnerId
+                    OwnerId = ownerId
                 };
                 await authorAssistantDatabaseContext.Books.AddAsync(entity, cancellationToken: cancellationToken);
                 await authorAssistantDatabaseContext.SaveChangesAsync(cancellationToken);

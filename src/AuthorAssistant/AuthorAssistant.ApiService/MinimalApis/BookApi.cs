@@ -58,8 +58,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     CancellationToken cancellationToken) =>
                 {
                     var userId = await userProviderService.GetUserIdAsync(cancellationToken);
-                    createBookModel.OwnerId = userId;
-                    var result = await bookService.CreateBookAsync(createBookModel, cancellationToken);
+                    var result = await bookService.CreateBookAsync(createBookModel, userId, cancellationToken);
                     return Results.Ok(result);
                 }).WithName("CreateBook");
 
