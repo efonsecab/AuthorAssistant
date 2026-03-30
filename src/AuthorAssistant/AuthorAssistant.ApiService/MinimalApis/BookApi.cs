@@ -14,7 +14,24 @@ namespace AuthorAssistant.ApiService.MinimalApis
     {
         public static WebApplication MapBookApi(this WebApplication app)
         {
-            app.MapPost("api/book/CreateBook", 
+            var apiGroup = app.MapGroup("/api");
+            var bookGroup = apiGroup
+                .MapGroup("/book")
+                .WithTags("Book");
+
+            bookGroup.MapPost("/uploadBook", async (IFormFile formFile) =>
+            {
+                if (formFile is null || formFile.Length == 0)
+                {
+                    return Results.BadRequest("No file uploaded.");
+                }
+                using MemoryStream memoryStream = new MemoryStream();
+                await formFile.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+                return Results.NoContent();
+            }).WithName("UploadBook");
+
+            bookGroup.MapPost("/createBook", 
                 async (
                     [FromServices] BookService bookService,
                     [FromServices] IUserProviderService userProviderService,
@@ -27,7 +44,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     return Results.Ok(result);
                 }).WithName("CreateBook");
             
-            app.MapPost("api/book/createBookPromoVideo",
+            bookGroup.MapPost("/createBookPromoVideo",
                 async ([FromServices] IVeoService veoService,
                 [FromBody] BookVideoRequest request, CancellationToken cancellationToken) =>
             {

@@ -12,7 +12,12 @@ namespace AuthorAssistant.ApiService.MinimalApis
     {
         public static WebApplication MapSubstackApi(this WebApplication app)
         {
-            app.MapPost("api/substack/generateArticle",
+            var apiGroup = app.MapGroup("/api");
+            var substackGroup = apiGroup
+                .MapGroup("/substack")
+                .WithTags("Substack");
+
+            substackGroup.MapPost("/generateArticle",
                 async ([FromServices] IGoogleGeminiService googleGeminiService,
                 [FromBody] SubstackArticleRequest request, CancellationToken cancellationToken) =>
             {
@@ -32,7 +37,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                 return result is not null ? Results.Ok(result) : Results.NoContent();
             }).WithName("GenerateArticle");
 
-            app.MapPost("api/substack/generateImage",
+            substackGroup.MapPost("/generateImage",
                 async ([FromServices] INanoBananaService nanoBananaService,
                 [FromBody] SubstackImageRequest request, CancellationToken cancellationToken) =>
                 {
@@ -61,7 +66,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     }
                 }).WithName("GenerateImage");
 
-            app.MapPost("api/substack/generateVideo",
+            substackGroup.MapPost("/generateVideo",
                 async ([FromServices] IVeoService veoService,
                 [FromBody] SubstackVideoRequest request, CancellationToken cancellationToken) =>
                 {
@@ -88,7 +93,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     }
                 }).WithName("GenerateVideo");
 
-            app.MapPost("api/substack/generateNotes",
+            substackGroup.MapPost("/generateNotes",
                 async ([FromServices] IGoogleGeminiService googleGeminiService,
                 [FromBody] SubstackNotesRequest request, CancellationToken cancellationToken) =>
                 {
@@ -101,7 +106,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     return result is not null ? Results.Ok(result) : Results.NoContent();
                 }).WithName("GenerateNotes");
 
-            app.MapPost("api/substack/generateLinkedInPost",
+            substackGroup.MapPost("/generateLinkedInPost",
                 async ([FromServices] IGoogleGeminiService googleGeminiService,
                 [FromBody] SubstackLinkedInPostRequest request, CancellationToken cancellationToken) =>
                 {
@@ -115,7 +120,7 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     return result is not null ? Results.Ok(result) : Results.NoContent();
                 }).WithName("GenerateLinkedInPost");
 
-            app.MapPost("api/substack/generateFacebookPersonalFeedPost",
+            substackGroup.MapPost("/generateFacebookPersonalFeedPost",
                 async ([FromServices] IGoogleGeminiService googleGeminiService,
                 [FromBody] SubstackFacebookPostRequest request, CancellationToken cancellationToken) =>
                 {

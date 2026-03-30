@@ -26,6 +26,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+builder.Services.AddAntiforgery();
 
 builder.AddSqlServerDbContext<AuthorAssistantDatabaseContext>(connectionName: "AuthorAssistantDatabase");
 builder.Services.AddTransient<IUserProviderService, TestUserProviderService>();
@@ -44,6 +45,8 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+
+app.UseAntiforgery();
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
