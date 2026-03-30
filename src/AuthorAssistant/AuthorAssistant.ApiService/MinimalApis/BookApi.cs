@@ -1,8 +1,8 @@
 ﻿using AuthorAssistant.ApiService.MinimalApis.Enums;
 using AuthorAssistant.Models.Book;
 using AuthorAssistant.Services.Book;
-using AuthorAssistant.Services.GoogleGemini;
 using AuthorAssistant.Services.NanoBanana;
+using AuthorAssistant.Services.NanoBanana.Enums;
 using AuthorAssistant.Services.User;
 using AuthorAssistant.Services.Veo;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +19,25 @@ namespace AuthorAssistant.ApiService.MinimalApis
                 .MapGroup("/book")
                 .WithTags("Book");
 
+            bookGroup.MapPost("/createAmazonKdpCoverImageConcept",
+                async ([FromServices] INanoBananaService nanoBananaService,
+                CoverImageConceptRequest coverImageConceptRequest,
+                CancellationToken cancellationToken) =>
+            {
+                string prompt = $"Create an amazon kdp book cover image concept for a book with the following details:\n" +
+                $"Image Style: {coverImageConceptRequest.ImageStyle}\n" +
+                $"Book Title: {coverImageConceptRequest.BookTitle}\n" +
+                $"Book Content: {coverImageConceptRequest.BookContent}\n" +
+                $"Image must not have text\n" +
+                $"Image must follow amazon kdp guidelines.\n" +
+                $"I will use the image to place in the Amazon KDP Cover Designer";
+                var result = await nanoBananaService.CreateImageAsync(prompt, ImageSize.OneK, cancellationToken);
+                return result.imageBytes is not null ?
+                        Results.File(
+                            fileContents: result.imageBytes,
+                            contentType: result.mimeType ?? "application/octet-stream")
+                        : Results.NoContent();
+            });
             bookGroup.MapPost("/uploadBook", async (IFormFile formFile) =>
             {
                 if (formFile is null || formFile.Length == 0)
@@ -31,19 +50,19 @@ namespace AuthorAssistant.ApiService.MinimalApis
                 return Results.NoContent();
             }).WithName("UploadBook");
 
-            bookGroup.MapPost("/createBook", 
+            bookGroup.MapPost("/createBook",
                 async (
                     [FromServices] BookService bookService,
                     [FromServices] IUserProviderService userProviderService,
-                    [FromBody] CreateBookModel createBookModel, 
-                    CancellationToken cancellationToken) => 
+                    [FromBody] CreateBookModel createBookModel,
+                    CancellationToken cancellationToken) =>
                 {
                     var userId = await userProviderService.GetUserIdAsync(cancellationToken);
                     createBookModel.OwnerId = userId;
                     var result = await bookService.CreateBookAsync(createBookModel, cancellationToken);
                     return Results.Ok(result);
                 }).WithName("CreateBook");
-            
+
             bookGroup.MapPost("/createBookPromoVideo",
                 async ([FromServices] IVeoService veoService,
                 [FromBody] BookVideoRequest request, CancellationToken cancellationToken) =>
@@ -84,5 +103,15 @@ namespace AuthorAssistant.ApiService.MinimalApis
         public required bool? AddVoiceOver { get; set; }
         [Required]
         public required VideoStyle? VideoStyle { get; set; }
+    }
+
+    public class CoverImageConceptRequest
+    {
+        [Required]
+        public required string? BookTitle { get; set; }
+        [Required]
+        public required string? BookContent { get; set; }
+        [Required]
+        public required ImageStyle? ImageStyle { get; set; }
     }
 }
