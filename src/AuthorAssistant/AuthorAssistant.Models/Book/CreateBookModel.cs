@@ -6,9 +6,12 @@ namespace AuthorAssistant.Models.Book
     {
         [Required]
         [StringLength(maximumLength:50)]
-        public required string? Name { get; set; }
+        public string? Name { get; set; }
         [Required]
         [StringLength(maximumLength:450)]
-        public required string? Description { get; set; }
+        public string? Description { get; set; }
+        [Required]
+        [StringLength(maximumLength: 125000)]
+        public string? TextContent { get; set; }
     }
 }

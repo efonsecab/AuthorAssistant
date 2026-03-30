@@ -1,11 +1,14 @@
 ﻿using AuthorAssistant.DataAccess.Data;
 using AuthorAssistant.DataAccess.Models;
 using AuthorAssistant.Models.Book;
+using AuthorAssistant.Services.Enums;
+using AuthorAssistant.Services.NanoBanana;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorAssistant.Services.Book
 {
-    public class BookService(AuthorAssistantDatabaseContext authorAssistantDatabaseContext)
+    public class BookService(AuthorAssistantDatabaseContext authorAssistantDatabaseContext,
+        INanoBananaService nanoBananaService)
     {
         public async Task<BookModel> CreateBookAsync(CreateBookModel bookModel, string ownerId, CancellationToken cancellationToken)
         {
@@ -18,7 +21,8 @@ namespace AuthorAssistant.Services.Book
                 {
                     Description = bookModel.Description,
                     Name = bookModel.Name,
-                    OwnerId = ownerId
+                    OwnerId = ownerId,
+                    TextContent = bookModel.TextContent
                 };
                 await authorAssistantDatabaseContext.Books.AddAsync(entity, cancellationToken: cancellationToken);
                 await authorAssistantDatabaseContext.SaveChangesAsync(cancellationToken);
@@ -27,7 +31,8 @@ namespace AuthorAssistant.Services.Book
                     Description = entity.Description,
                     Name = entity.Name,
                     OwnerId = entity.OwnerId,
-                    BookId = entity.BookId
+                    BookId = entity.BookId,
+                    TextContent = entity.TextContent
                 };
                 return result;
             }
@@ -53,7 +58,7 @@ namespace AuthorAssistant.Services.Book
             var entity = await authorAssistantDatabaseContext.Books
                 .SingleOrDefaultAsync(p => p.BookId == bookId && p.OwnerId == userId,
                 cancellationToken: cancellationToken);
-            
+
             if (entity is not null)
             {
                 entity.Name = createBookModel.Name;
@@ -64,7 +69,8 @@ namespace AuthorAssistant.Services.Book
                     Description = entity.Description,
                     Name = entity.Name,
                     OwnerId = entity.OwnerId,
-                    BookId = entity.BookId
+                    BookId = entity.BookId,
+                    TextContent = entity.TextContent
                 };
             }
             else
@@ -85,7 +91,8 @@ namespace AuthorAssistant.Services.Book
                     Description = entity.Description,
                     Name = entity.Name,
                     OwnerId = entity.OwnerId,
-                    BookId = entity.BookId
+                    BookId = entity.BookId,
+                    TextContent = entity.TextContent
                 }).ToArray();
             }
             else
@@ -105,12 +112,85 @@ namespace AuthorAssistant.Services.Book
                     Description = entity.Description,
                     Name = entity.Name,
                     OwnerId = entity.OwnerId,
-                    BookId = entity.BookId
+                    BookId = entity.BookId,
+                    TextContent = entity.TextContent
                 };
             }
             else
             {
                 throw new Exception("Book not found");
+            }
+        }
+
+        public async Task CreateBookCoverImageConceptAsync(long bookId,
+            ImageStyle imageStyle,
+            CancellationToken cancellationToken)
+        {
+            var entity = await authorAssistantDatabaseContext.Books
+                .SingleOrDefaultAsync(p => p.BookId == bookId, cancellationToken: cancellationToken);
+            if (entity is not null)
+            {
+                var bookFile = await authorAssistantDatabaseContext.BookFiles
+                    .SingleOrDefaultAsync(p => p.BookId == bookId, cancellationToken: cancellationToken);
+                var bookText = bookFile is not null ? System.Text.Encoding.UTF8.GetString(bookFile.BinaryData) :
+                    string.Empty;
+                string prompt = $"Create an book cover image concept for a book with the following details:\n" +
+                $"Image Style: {imageStyle}\n" +
+                $"Book Title: {entity.Name}\n" +
+                $"Book Content: {bookText}\n" +
+                $"Image must not have text\n" +
+                $"Image must follow amazon kdp guidelines.\n" +
+                $"I will use the image to place in the Amazon KDP Cover Designer";
+            }
+        }
+
+        public async Task UploadBookFileAsync(long bookId, UploadBookFileModel uploadBookFileModel, CancellationToken cancellationToken)
+        {
+            var entity = await authorAssistantDatabaseContext.Books
+                .SingleOrDefaultAsync(p => p.BookId == bookId, cancellationToken: cancellationToken);
+            if (entity is not null)
+            {
+                var bookFileEntity = await authorAssistantDatabaseContext.BookFiles
+                    .SingleOrDefaultAsync(p => p.BookId == bookId, cancellationToken: cancellationToken);
+                if (bookFileEntity is not null)
+                {
+                    bookFileEntity.BinaryData = uploadBookFileModel.BinaryData;
+                    bookFileEntity.MimeType = uploadBookFileModel.MimeType;
+                }
+                else
+                {
+                    bookFileEntity = new BookFile()
+                    {
+                        BookId = bookId,
+                        BinaryData = uploadBookFileModel.BinaryData,
+                        MimeType = uploadBookFileModel.MimeType
+                    };
+                    await authorAssistantDatabaseContext.BookFiles.AddAsync(bookFileEntity, cancellationToken: cancellationToken);
+                }
+                await authorAssistantDatabaseContext.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                throw new Exception("Book not found");
+            }
+        }
+
+        public async Task<BookFileModel> GetBookFileByBookIdAsync(long bookId, CancellationToken cancellationToken)
+        {
+            var entity = await authorAssistantDatabaseContext.BookFiles
+                .SingleOrDefaultAsync(p => p.BookId == bookId, cancellationToken: cancellationToken);
+            if (entity is not null)
+            {
+                return new BookFileModel()
+                {
+                    BookId = entity.BookId,
+                    MimeType = entity.MimeType,
+                    BinaryData = entity.BinaryData
+                };
+            }
+            else
+            {
+                throw new Exception("Book file not found");
             }
         }
     }

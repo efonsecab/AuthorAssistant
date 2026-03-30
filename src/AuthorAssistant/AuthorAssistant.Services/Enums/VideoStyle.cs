@@ -1,4 +1,4 @@
-﻿namespace AuthorAssistant.ApiService.MinimalApis.Enums
+﻿namespace AuthorAssistant.Services.Enums
 {
     public enum VideoStyle
     {

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using AuthorAssistant.Services.NanoBanana.Enums;
 using AuthorAssistant.Services.NanoBanana;
 using AuthorAssistant.Services.Veo;
-using AuthorAssistant.ApiService.MinimalApis.Enums;
+using AuthorAssistant.Services.Enums;
 
 namespace AuthorAssistant.ApiService.MinimalApis
 {

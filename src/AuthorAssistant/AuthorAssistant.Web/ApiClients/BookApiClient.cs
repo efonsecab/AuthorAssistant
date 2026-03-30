@@ -35,5 +35,11 @@ namespace AuthorAssistant.Web.ApiClients
             var book = await response.Content.ReadFromJsonAsync<BookModel>(cancellationToken: cancellationToken);
             return book!;
         }
+
+        public async Task UploadBookFileAsync(UploadBookFileModel uploadBookFileModel, CancellationToken cancellationToken)
+        {
+            var response = await httpClient.PostAsJsonAsync("/api/book/uploadBookFile", uploadBookFileModel, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
     }
 }

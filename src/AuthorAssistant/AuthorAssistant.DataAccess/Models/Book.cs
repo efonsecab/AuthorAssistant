@@ -15,6 +15,10 @@ public partial class Book
 
     public string Description { get; set; }
 
+    public string TextContent { get; set; }
+
+    public virtual ICollection<BookCoverImageConcept> BookCoverImageConcepts { get; set; } = new List<BookCoverImageConcept>();
+
     public virtual ICollection<BookFile> BookFiles { get; set; } = new List<BookFile>();
 
     public virtual AspNetUser Owner { get; set; }

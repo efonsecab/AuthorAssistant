@@ -27,6 +27,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[BookCoverImageConcept]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[BookFile]",
          "ObjectType": 0
       }

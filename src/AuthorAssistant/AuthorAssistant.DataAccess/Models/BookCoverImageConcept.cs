@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace AuthorAssistant.DataAccess.Models;
 
-public partial class BookFile
+public partial class BookCoverImageConcept
 {
-    public long BookFileId { get; set; }
+    public long BookCoverImageConceptId { get; set; }
 
     public long BookId { get; set; }
 

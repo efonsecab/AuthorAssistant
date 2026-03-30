@@ -16,5 +16,7 @@ namespace AuthorAssistant.Models.Book
         [Required]
         [StringLength(maximumLength: 450)]
         public required string? Description { get; set; }
+        [Required]
+        public required string? TextContent { get; set; }
     }
 }

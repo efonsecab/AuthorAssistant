@@ -18,38 +18,75 @@
     <LoadingSpinner></LoadingSpinner>
 }
 
-<EditForm Model="@createBookModel" OnValidSubmit="OnValidSubmitAsync">
-    <div class="row">
-        <DataAnnotationsValidator></DataAnnotationsValidator>
-        <ValidationSummary></ValidationSummary>
-    </div>
-    <div class="row">
-        <div class="col">
-            <label for="@nameof(CreateBookModel.Name)">Name:</label>
+@if (createBookModel != null)
+{
+    <EditForm FormName="frmCreateBook" Model="@createBookModel" OnValidSubmit="OnValidSubmitAsync">
+        <div class="row">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
         </div>
-        <div class="col">
-            <InputText class="form-control" @bind-Value="createBookModel.Name" />
-            <ValidationMessage For="@(() => createBookModel.Name)" />
+        <div class="row">
+            <div class="col">
+                <label for="@nameof(CreateBookModel.Name)">Name:</label>
+            </div>
+            <div class="col">
+                <InputText class="form-control" @bind-Value="createBookModel.Name" />
+                <ValidationMessage For="@(() => createBookModel.Name)" />
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <label for="@nameof(CreateBookModel.Description)">Description:</label>
+        <div class="row">
+            <div class="col">
+                <label for="@nameof(CreateBookModel.Description)">Description:</label>
+            </div>
+            <div class="col">
+                <InputTextArea class="form-control" @bind-Value="createBookModel.Description" />
+                <ValidationMessage For="@(() => createBookModel.Description)" />
+            </div>
         </div>
-        <div class="col">
-            <InputTextArea class="form-control" @bind-Value="createBookModel.Description" />
-            <ValidationMessage For="@(() => createBookModel.Description)" />
+        <div class="row">
+            <div class="col">
+                <label for="@nameof(CreateBookModel.TextContent)">Text Content:</label>
+            </div>
+            <div class="col">
+                <InputTextArea class="form-control" @bind-Value="createBookModel.TextContent" />
+                <ValidationMessage For="@(() => createBookModel.TextContent)" />
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            @if (this.IsBusy == false)
-            {
-                <button type="submit" class="btn btn-primary">Save Book</button>
-            }
+        <div class="row">
+            <div class="col">
+                @if (this.IsBusy == false)
+                {
+                    <button type="submit" class="btn btn-primary">Save Book</button>
+                }
+            </div>
         </div>
-    </div>
-</EditForm>
+    </EditForm>
+}
+
+@if (uploadBookFileModel != null)
+{
+    <EditForm FormName="frmUploadBookFile" Model="@uploadBookFileModel" OnValidSubmit="OnValidSubmitUploadBookFileAsync">
+        <div class="row">
+            <div class="col">
+                <label>File:</label>
+            </div>
+            <div class="col">
+                <InputFile OnChange="OnInputFileChange" />
+                <ValidationMessage For="@(() => uploadBookFileModel!.BinaryData)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                @if (this.IsBusy == false)
+                {
+                    <button type="submit" class="btn btn-primary">Upload Book File</button>
+                }
+            </div>
+        </div>
+    </EditForm>
+}
+
+
 
 
 @code {
@@ -57,16 +94,19 @@
     public long? BookId { get; set; }
     private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
     private bool IsBusy { get; set; } = false;
-    public CreateBookModel createBookModel { get; set; } = new CreateBookModel()
-    {
-        Description = string.Empty,
-        Name = string.Empty
-    };
+    [SupplyParameterFromForm(FormName = "frmCreateBook")]
+    private CreateBookModel? createBookModel { get; set; }
+
+    [SupplyParameterFromForm(FormName = "frmUploadBookFile")]
+    private UploadBookFileModel? uploadBookFileModel { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            createBookModel ??= new CreateBookModel();
+            uploadBookFileModel ??= new UploadBookFileModel();
+
             IsBusy = true;
             if (BookId.HasValue)
             {
@@ -96,11 +136,12 @@
             IsBusy = true;
             if (!this.BookId.HasValue)
             {
-                await bookApiClient.CreateBookAsync(createBookModel, cancellationTokenSource.Token);
+                var resut = await bookApiClient.CreateBookAsync(createBookModel!, cancellationTokenSource.Token);
+                this.BookId = resut.BookId;
             }
             else
             {
-                await bookApiClient.UpdateBookAsync(BookId.Value, createBookModel, cancellationTokenSource.Token);
+                await bookApiClient.UpdateBookAsync(BookId.Value, createBookModel!, cancellationTokenSource.Token);
             }
 
         }
@@ -112,6 +153,41 @@
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private async Task OnValidSubmitUploadBookFileAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            if (this.BookId.HasValue)
+            {
+                uploadBookFileModel!.BookId = this.BookId.Value;
+                await bookApiClient.UploadBookFileAsync(uploadBookFileModel, cancellationTokenSource.Token);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exception (e.g., show error message)
+            logger.LogError(ex, "An error occurred while uploading the book file. {Message}", ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using var stream = file.OpenReadStream();
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            uploadBookFileModel!.BinaryData = memoryStream.ToArray();
+            uploadBookFileModel!.MimeType = file.ContentType;
         }
     }
 }

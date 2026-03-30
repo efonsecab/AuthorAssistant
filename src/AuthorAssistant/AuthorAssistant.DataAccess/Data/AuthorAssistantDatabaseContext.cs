@@ -18,6 +18,8 @@ public partial class AuthorAssistantDatabaseContext : DbContext
 
     public virtual DbSet<Book> Books { get; set; }
 
+    public virtual DbSet<BookCoverImageConcept> BookCoverImageConcepts { get; set; }
+
     public virtual DbSet<BookFile> BookFiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,15 +28,16 @@ public partial class AuthorAssistantDatabaseContext : DbContext
         {
             entity.ToTable("Book");
 
+            entity.HasIndex(e => new { e.Name, e.OwnerId }, "UI_Book_Name_OwnerId").IsUnique();
+
             entity.Property(e => e.Description)
                 .IsRequired()
                 .HasMaxLength(450);
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(50);
-            entity.Property(e => e.OwnerId)
-                .IsRequired()
-                .HasMaxLength(450);
+            entity.Property(e => e.OwnerId).IsRequired();
+            entity.Property(e => e.TextContent).IsRequired();
 
             entity.HasOne(d => d.Owner).WithMany(p => p.Books)
                 .HasForeignKey(d => d.OwnerId)
@@ -42,11 +45,29 @@ public partial class AuthorAssistantDatabaseContext : DbContext
                 .HasConstraintName("FK_Book_AspNetUsers");
         });
 
+        modelBuilder.Entity<BookCoverImageConcept>(entity =>
+        {
+            entity.ToTable("BookCoverImageConcept");
+
+            entity.Property(e => e.BinaryData).IsRequired();
+            entity.Property(e => e.MimeType)
+                .IsRequired()
+                .HasMaxLength(250);
+
+            entity.HasOne(d => d.Book).WithMany(p => p.BookCoverImageConcepts)
+                .HasForeignKey(d => d.BookId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_BookCoverImageConcept_Book");
+        });
+
         modelBuilder.Entity<BookFile>(entity =>
         {
             entity.ToTable("BookFile");
 
             entity.Property(e => e.BinaryData).IsRequired();
+            entity.Property(e => e.MimeType)
+                .IsRequired()
+                .HasMaxLength(250);
 
             entity.HasOne(d => d.Book).WithMany(p => p.BookFiles)
                 .HasForeignKey(d => d.BookId)

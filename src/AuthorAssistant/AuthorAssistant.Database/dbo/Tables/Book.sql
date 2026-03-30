@@ -4,6 +4,7 @@
     [OwnerId] NVARCHAR(450) NOT NULL,
     [Name] NVARCHAR(50) NOT NULL, 
     [Description] NVARCHAR(450) NOT NULL, 
+    [TextContent] NVARCHAR(MAX) NOT NULL, 
     CONSTRAINT [FK_Book_AspNetUsers] FOREIGN KEY ([OwnerId]) REFERENCES [AspNetUsers]([Id])
 )
 

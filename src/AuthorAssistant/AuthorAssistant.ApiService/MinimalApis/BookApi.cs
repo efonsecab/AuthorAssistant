@@ -1,6 +1,6 @@
-﻿using AuthorAssistant.ApiService.MinimalApis.Enums;
-using AuthorAssistant.Models.Book;
+﻿using AuthorAssistant.Models.Book;
 using AuthorAssistant.Services.Book;
+using AuthorAssistant.Services.Enums;
 using AuthorAssistant.Services.NanoBanana;
 using AuthorAssistant.Services.NanoBanana.Enums;
 using AuthorAssistant.Services.User;
@@ -38,17 +38,26 @@ namespace AuthorAssistant.ApiService.MinimalApis
                             contentType: result.mimeType ?? "application/octet-stream")
                         : Results.NoContent();
             });
-            bookGroup.MapPost("/uploadBook", async (IFormFile formFile) =>
+            bookGroup.MapPost("/uploadBookFile", 
+                async (
+                    [FromServices] BookService bookService,
+                    [FromBody] UploadBookFileModel uploadBookFileModel) =>
             {
-                if (formFile is null || formFile.Length == 0)
-                {
-                    return Results.BadRequest("No file uploaded.");
-                }
-                using MemoryStream memoryStream = new MemoryStream();
-                await formFile.CopyToAsync(memoryStream);
-                var fileBytes = memoryStream.ToArray();
-                return Results.NoContent();
+                await bookService.UploadBookFileAsync(uploadBookFileModel.BookId!.Value, uploadBookFileModel, CancellationToken.None);
             }).WithName("UploadBook");
+
+            bookGroup.MapGet("/content", 
+                async ([FromServices] BookService bookService,
+                       [FromQuery] long bookId,
+                       CancellationToken cancellationToken) =>
+                {
+                    var result = await bookService.GetBookFileByBookIdAsync(bookId, cancellationToken);
+                    return result.BinaryData is not null ?
+                        Results.File(
+                            fileContents: result.BinaryData,
+                            contentType: result.MimeType ?? "application/octet-stream")
+                        : Results.NoContent();
+                }).WithName("GetBookFileContent");
 
             bookGroup.MapPost("/createBook",
                 async (

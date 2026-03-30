@@ -3,5 +3,6 @@
 	[BookFileId] BIGINT NOT NULL CONSTRAINT PK_BookFile PRIMARY KEY IDENTITY, 
     [BookId] BIGINT NOT NULL, 
     [BinaryData] VARBINARY(MAX) NOT NULL, 
+    [MimeType] NVARCHAR(250) NOT NULL, 
     CONSTRAINT [FK_BookFile_Book] FOREIGN KEY ([BookId]) REFERENCES [Book]([BookId])
 )

@@ -7,4 +7,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="BookFileId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1b193c1c-e580-4219-a26d-8e35f18351c7" ChangeDateTime="03/30/2026 15:31:11">
+    <Property Name="ElementName" Value="[dbo].[BookCoverImageConcept].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[BookCoverImageConcept]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="BookCoverImageConcept" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8ba12a56-1f98-4fca-9df9-83dd678bd0ca" ChangeDateTime="03/30/2026 15:31:31">
+    <Property Name="ElementName" Value="[dbo].[BookCoverImageConcept].[BookCoverImageConcept]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[BookCoverImageConcept]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="BookCoverImageConceptId" />
+  </Operation>
 </Operations>
