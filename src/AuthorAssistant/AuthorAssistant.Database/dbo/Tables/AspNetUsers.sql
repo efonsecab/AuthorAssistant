@@ -1,0 +1,5 @@
+﻿CREATE TABLE [dbo].[AspNetUsers] (
+    [Id] NVARCHAR (450) NOT NULL,
+    CONSTRAINT [PK_AspNetUsers] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+

@@ -1,5 +1,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var databaseConnectionString = 
+    builder.AddConnectionString("AuthorAssistantDatabase");
 
 var goolgeGeminiConfigurationApiKey = 
     builder.Configuration["GoogleGeminiConfiguration:ApiKey"] ?? 
@@ -10,7 +12,8 @@ var apiService = builder.AddProject<Projects.AuthorAssistant_ApiService>("apiser
     .WithEnvironment(callback => 
     {
         callback.EnvironmentVariables.Add("GoogleGeminiConfiguration:ApiKey", goolgeGeminiConfigurationApiKey);
-    });
+    })
+    .WithReference(databaseConnectionString);
 
 builder.AddProject<Projects.AuthorAssistant_Web>("webfrontend")
     .WithExternalHttpEndpoints()

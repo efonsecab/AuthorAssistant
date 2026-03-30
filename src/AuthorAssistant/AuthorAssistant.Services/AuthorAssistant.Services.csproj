@@ -11,4 +11,13 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AuthorAssistant.DataAccess\AuthorAssistant.DataAccess.csproj" />
+    <ProjectReference Include="..\AuthorAssistant.Models\AuthorAssistant.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+
 </Project>

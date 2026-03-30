@@ -1,0 +1,8 @@
+﻿CREATE TABLE [dbo].[Book]
+(
+	[BookId] BIGINT NOT NULL PRIMARY KEY IDENTITY,
+    [OwnerId] NVARCHAR(450) NOT NULL,
+    [Name] NVARCHAR(50) NOT NULL, 
+    [Description] NVARCHAR(450) NOT NULL, 
+    CONSTRAINT [FK_Book_AspNetUsers] FOREIGN KEY ([OwnerId]) REFERENCES [AspNetUsers]([Id])
+)

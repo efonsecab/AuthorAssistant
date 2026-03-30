@@ -1,6 +1,12 @@
 <Solution>
   <Project Path="AuthorAssistant.ApiService/AuthorAssistant.ApiService.csproj" />
   <Project Path="AuthorAssistant.AppHost/AuthorAssistant.AppHost.csproj" />
+  <Project Path="AuthorAssistant.DataAccess/AuthorAssistant.DataAccess.csproj" Id="f1b981c6-8f9f-47b8-b4f0-cbd7cdc38ad3" />
+  <Project Path="AuthorAssistant.Database/AuthorAssistant.Database.sqlproj" Id="301821bd-525c-4767-bf07-49106f35ae44">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="AuthorAssistant.Models/AuthorAssistant.Models.csproj" Id="ccb96531-daed-4224-8dc8-6ecb343c5d00" />
   <Project Path="AuthorAssistant.ServiceDefaults/AuthorAssistant.ServiceDefaults.csproj" />
   <Project Path="AuthorAssistant.Services/AuthorAssistant.Services.csproj" />
   <Project Path="AuthorAssistant.Tests/AuthorAssistant.Tests.csproj" />

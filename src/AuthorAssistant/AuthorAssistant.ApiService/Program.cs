@@ -1,6 +1,9 @@
 using AuthorAssistant.ApiService.Extensions;
 using AuthorAssistant.ApiService.MinimalApis;
-using AuthorAssistant.Services.GoogleGemini;
+using AuthorAssistant.ApiService.Providers;
+using AuthorAssistant.DataAccess.Data;
+using AuthorAssistant.Services.Book;
+using AuthorAssistant.Services.User;
 using Scalar.AspNetCore;
 using System.Text.Json.Serialization;
 
@@ -21,7 +24,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 
+builder.AddSqlServerDbContext<AuthorAssistantDatabaseContext>(connectionName: "AuthorAssistantDatabase");
+builder.Services.AddTransient<IUserProviderService, TestUserProviderService>();
+builder.Services.AddTransient<BookService>();
 builder.Services.AddGoogleGenAI(builder.Configuration);
+builder.Services.AddValidation();
 
 var app = builder.Build();
 

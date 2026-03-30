@@ -1,6 +1,9 @@
 ﻿using AuthorAssistant.ApiService.MinimalApis.Enums;
+using AuthorAssistant.Models.Book;
+using AuthorAssistant.Services.Book;
 using AuthorAssistant.Services.GoogleGemini;
 using AuthorAssistant.Services.NanoBanana;
+using AuthorAssistant.Services.User;
 using AuthorAssistant.Services.Veo;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +14,19 @@ namespace AuthorAssistant.ApiService.MinimalApis
     {
         public static WebApplication MapBookApi(this WebApplication app)
         {
+            app.MapPost("api/book/CreateBook", 
+                async (
+                    [FromServices] BookService bookService,
+                    [FromServices] IUserProviderService userProviderService,
+                    [FromBody] CreateBookModel createBookModel, 
+                    CancellationToken cancellationToken) => 
+                {
+                    var userId = await userProviderService.GetUserIdAsync(cancellationToken);
+                    createBookModel.OwnerId = userId;
+                    var result = await bookService.CreateBookAsync(createBookModel, cancellationToken);
+                    return Results.Ok(result);
+                }).WithName("CreateBook");
+            
             app.MapPost("api/book/createBookPromoVideo",
                 async ([FromServices] IVeoService veoService,
                 [FromBody] BookVideoRequest request, CancellationToken cancellationToken) =>
