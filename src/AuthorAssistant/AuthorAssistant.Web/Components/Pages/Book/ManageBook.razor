@@ -8,6 +8,7 @@
 @rendermode InteractiveServer
 
 @inject BookApiClient bookApiClient
+@inject ILogger<ManageBook> logger
 
 <h3>ManageBook</h3>
 
@@ -44,7 +45,7 @@
         <div class="col">
             @if (this.IsBusy == false)
             {
-                <button type="submit" class="btn btn-primary">Create Book</button>
+                <button type="submit" class="btn btn-primary">Save Book</button>
             }
         </div>
     </div>
@@ -62,16 +63,51 @@
         Name = string.Empty
     };
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            if (BookId.HasValue)
+            {
+                var book = await bookApiClient.GetBookByIdAsync(BookId.Value, cancellationTokenSource.Token);
+                if (book != null)
+                {
+                    createBookModel.Name = book.Name;
+                    createBookModel.Description = book.Description;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exception (e.g., show error message)
+            logger.LogError(ex, "An error occurred while initializing the component. {Message}", ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task OnValidSubmitAsync()
     {
         try
         {
             IsBusy = true;
-            var result = await bookApiClient.CreateBookAsync(createBookModel, cancellationTokenSource.Token);
+            if (!this.BookId.HasValue)
+            {
+                await bookApiClient.CreateBookAsync(createBookModel, cancellationTokenSource.Token);
+            }
+            else
+            {
+                await bookApiClient.UpdateBookAsync(BookId.Value, createBookModel, cancellationTokenSource.Token);
+            }
+
         }
         catch (Exception ex)
         {
             // Handle exception (e.g., show error message)
+            logger.LogError(ex, "An error occurred while creating the book. {Message}", ex.Message);
         }
         finally
         {

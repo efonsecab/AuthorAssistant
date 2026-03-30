@@ -57,10 +57,42 @@ namespace AuthorAssistant.ApiService.MinimalApis
                     [FromBody] CreateBookModel createBookModel,
                     CancellationToken cancellationToken) =>
                 {
-                    var userId = await userProviderService.GetUserIdAsync(cancellationToken);
+                    var userId = await userProviderService.GetUserIdAsync(cancellationToken) ?? throw new Exception("User not found");
                     var result = await bookService.CreateBookAsync(createBookModel, userId, cancellationToken);
                     return Results.Ok(result);
                 }).WithName("CreateBook");
+
+            bookGroup.MapGet("getAllMyBooks", 
+                async ([FromServices] BookService bookService,
+                       [FromServices] IUserProviderService userProviderService,
+                       CancellationToken cancellationToken) =>
+                {
+                    var userId = await userProviderService.GetUserIdAsync(cancellationToken) ?? throw new Exception("User not found");
+                    var result = await bookService.GetAllBooksForUserAsync(userId, cancellationToken);
+                    return Results.Ok(result);
+                }).WithName("GetAllMyBooks");
+
+            bookGroup.MapGet("/getBookByBookId",
+                async ([FromServices] BookService bookService,
+                       [FromServices] IUserProviderService userProviderService,
+                       [FromQuery] long bookId,
+                       CancellationToken cancellationToken) =>
+                {
+                    var result = await bookService.GetBookByBookIdAsync(bookId, cancellationToken);
+                    return Results.Ok(result);
+                }).WithName("GetBookByBookId");
+
+            bookGroup.MapPut("/updateBook", 
+                async ([FromServices] BookService bookService,
+                       [FromServices] IUserProviderService userProviderService,
+                       [FromBody] CreateBookModel createBookModel,
+                       [FromQuery] long bookId,
+                       CancellationToken cancellationToken) =>
+                {
+                    var userId = await userProviderService.GetUserIdAsync(cancellationToken) ?? throw new Exception("User not found");
+                    var result = await bookService.UpdateBookAsync(bookId, createBookModel, userId, cancellationToken);
+                    return Results.Ok(result);
+                }).WithName("UpdateBook");
 
             bookGroup.MapPost("/createBookPromoVideo",
                 async ([FromServices] IVeoService veoService,

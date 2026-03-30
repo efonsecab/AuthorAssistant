@@ -1,0 +1,60 @@
+﻿@page "/book/list"
+@using AuthorAssistant.Models.Book
+@using AuthorAssistant.Web.ApiClients
+@using AuthorAssistant.Web.Components.Spinners
+@attribute [StreamRendering(true)]
+@attribute [OutputCache(Duration = 5)]
+
+@inject BookApiClient bookApiClient
+@inject ILogger<ListBooks> logger
+
+<h3>ListBooks</h3>
+
+@if (IsBusy)
+{
+    <LoadingSpinner></LoadingSpinner>
+}
+else
+{
+    if (Books is null || Books?.Length == 0)
+    {
+        <p><em>No books found.</em></p>
+    }
+    else
+    {
+        foreach (var singleBook in Books!)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">@singleBook.Name</h5>
+                    <p class="card-text">@singleBook.Description</p>
+                    <a href="/book/manage/@singleBook.BookId" class="btn btn-primary">Manage</a>
+                </div>
+            </div>
+        }
+    }
+}
+
+@code {
+    private BookModel[]? Books { get; set; }
+    private bool IsBusy { get; set; } = false;
+    private readonly CancellationTokenSource cancellationTokenSource = new();
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            Books = await bookApiClient.GetAllMyBooksAsync(cancellationTokenSource.Token);
+        }
+        catch (Exception ex)
+        {
+            // Ignore cancellation exceptions
+            logger.LogError(ex, "An error occurred while loading books. {Message}", ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+}
