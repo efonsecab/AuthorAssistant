@@ -8,7 +8,7 @@ namespace AuthorAssistant.Models.Book
         [StringLength(maximumLength:50)]
         public string? Name { get; set; }
         [Required]
-        [StringLength(maximumLength:450)]
+        [StringLength(maximumLength:4000)]
         public string? Description { get; set; }
         [Required]
         [StringLength(maximumLength: 125000)]

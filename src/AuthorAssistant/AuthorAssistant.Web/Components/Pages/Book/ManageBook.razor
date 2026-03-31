@@ -30,7 +30,7 @@
                 <label for="@nameof(CreateBookModel.Name)">Name:</label>
             </div>
             <div class="col">
-                <InputText class="form-control" @bind-Value="createBookModel.Name" />
+                <InputText class="form-control" @bind-Value="createBookModel.Name" maxlength="450" />
                 <ValidationMessage For="@(() => createBookModel.Name)" />
             </div>
         </div>
@@ -39,7 +39,7 @@
                 <label for="@nameof(CreateBookModel.Description)">Description:</label>
             </div>
             <div class="col">
-                <InputTextArea class="form-control" @bind-Value="createBookModel.Description" />
+                <InputTextArea class="form-control" @bind-Value="createBookModel.Description" maxlength="4000" />
                 <ValidationMessage For="@(() => createBookModel.Description)" />
             </div>
         </div>
@@ -48,7 +48,7 @@
                 <label for="@nameof(CreateBookModel.TextContent)">Text Content:</label>
             </div>
             <div class="col">
-                <InputTextArea class="form-control" @bind-Value="createBookModel.TextContent" />
+                <InputTextArea class="form-control" @bind-Value="createBookModel.TextContent" maxlength="125000" />
                 <ValidationMessage For="@(() => createBookModel.TextContent)" />
             </div>
         </div>
@@ -115,6 +115,7 @@
                 {
                     createBookModel.Name = book.Name;
                     createBookModel.Description = book.Description;
+                    createBookModel.TextContent = book.TextContent;
                 }
             }
         }

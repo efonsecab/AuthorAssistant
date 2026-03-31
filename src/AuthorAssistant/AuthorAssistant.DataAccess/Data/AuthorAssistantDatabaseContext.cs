@@ -137,7 +137,7 @@ public partial class AuthorAssistantDatabaseContext : DbContext
 
             entity.Property(e => e.Description)
                 .IsRequired()
-                .HasMaxLength(450);
+                .HasMaxLength(4000);
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(50);
