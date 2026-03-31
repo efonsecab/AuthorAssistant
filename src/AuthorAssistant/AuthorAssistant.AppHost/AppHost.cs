@@ -19,6 +19,7 @@ builder.AddProject<Projects.AuthorAssistant_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
     .WithReference(apiService)
+    .WithReference(databaseConnectionString)
     .WaitFor(apiService);
 
 builder.Build().Run();

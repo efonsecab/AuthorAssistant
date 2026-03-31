@@ -1,11 +1,17 @@
-using AuthorAssistant.Web;
+﻿using AuthorAssistant.Web;
 using AuthorAssistant.Web.ApiClients;
 using AuthorAssistant.Web.Components;
+using AuthorAssistant.Web.Components.Account;
+using AuthorAssistant.Web.Data;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
+
+builder.AddSqlServerDbContext<AuthorAssistantWebContext>(connectionName: "AuthorAssistantDatabase");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -31,6 +37,30 @@ builder.Services.AddHttpClient<BookApiClient>(client =>
     client.BaseAddress = new("https+http://apiservice");
 });
 
+builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddScoped<IdentityRedirectManager>();
+
+builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    })
+    .AddIdentityCookies();
+
+builder.Services.AddIdentityCore<AuthorAssistantWebUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+    })
+    .AddEntityFrameworkStores<AuthorAssistantWebContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddSingleton<IEmailSender<AuthorAssistantWebUser>, IdentityNoOpEmailSender>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -52,5 +82,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapDefaultEndpoints();
+
+app.MapAdditionalIdentityEndpoints();;
 
 app.Run();
